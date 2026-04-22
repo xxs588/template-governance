@@ -76,7 +76,7 @@ AI Native 流程反过来：
 
 ```
 讨论 → 决策冻结 → OpenSpec change（proposal/design/specs/tasks）
-  → 归档 → 回写 issue-dispatch → 下发 Issue
+  → 归档 → 下发 Issue → 回写 issue-dispatch（贴 URL）
     → 执行 → PR（决策上下文+真源+证据）→ 审核 → 合并 → 回写
 ```
 
