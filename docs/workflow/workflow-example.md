@@ -95,7 +95,13 @@ tasks.md：BE 先行，FE 后行，有依赖关系 → ✓
 
 1. 归档 OpenSpec change：`openspec/changes/comment-system/` → `openspec/changes/archive/comment-system/`
 
-2. 更新 `docs/runtime/issue-dispatch.md`：
+2. 在代码仓库创建对应 Issue，Issue body 包含：
+   - 控制面真源表格（每个真源要读什么）
+   - 自包含的目标描述（不依赖外部链接就能理解要做什么）
+   - 验收标准
+   - 参考规范链接（补充阅读）
+
+3. 拿到 Issue URL 后，回写 `docs/runtime/issue-dispatch.md`：
 
 ```
 | Priority | Repo | Issue | Why now | Status |
@@ -104,13 +110,7 @@ tasks.md：BE 先行，FE 后行，有依赖关系 → ✓
 | P0 | FE | FE#102 | 评论是 MVP 核心互动，依赖 BE #101 完成 | blocked(#101) |
 ```
 
-3. 更新 `docs/runtime/phase-current.md`。
-
-4. 在代码仓库创建对应 Issue，Issue body 包含：
-   - 控制面真源表格（每个真源要读什么）
-   - 自包含的目标描述（不依赖外部链接就能理解要做什么）
-   - 验收标准
-   - 参考规范链接（补充阅读）
+4. 更新 `docs/runtime/phase-current.md`。
 
 ---
 
