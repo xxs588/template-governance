@@ -4,10 +4,6 @@ AI Native 项目的控制面模板仓库。
 
 **核心定位**：这个仓库不是文档库，而是**推进项目的引擎**。通过 OpenSpec 把模糊的讨论变成冻结的决策，再拆解成 Issue 下发到代码仓库执行，最后验收回写，形成闭环。每一步都有 Harness（约束机制）兜底，确保 Agent 不跑偏、决策不丢失、产出可追溯。
 
-补充说明：这里说的“控制面”指的是**整个文档仓库**，不是单独的 `docs/control-plane/` 目录。`docs/control-plane/` 只是控制面里的宪法层；真正的控制面由 `docs/control-plane/`、`docs/workflow/`、`docs/harness/`、`docs/runtime/`、`templates/`、`contracts/`、`openspec/` 等共同组成。
-
-延伸阅读：[repo-control-plane-sharing.md](./repo-control-plane-sharing.md)
-
 ---
 
 ## 项目推进模型
