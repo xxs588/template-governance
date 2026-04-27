@@ -1,139 +1,235 @@
-# 工作流端到端示例：评论功能
+# 工作流端到端示例：MVP 第一阶段
 
-> 用途：展示控制面工作流如何从"PM 发起讨论"到"PR 合并回写"完整跑一遍。
+> 用途：展示控制面工作流如何从“先统筹一个阶段目标”到“拆多个 Issue 下发执行”完整跑一遍。
 > 这是一个虚构场景，用于说明流程，不作为实际业务需求。
 
 ---
 
-## 第 1 步：PM 发起聚焦讨论
+## 先说明这个例子为什么这样改
+
+这个例子不再用“单个小功能直接走完整套治理”的写法。
+
+更贴近真实推进方式的做法，通常是：
+
+1. 先围绕一个阶段或者一个 batch 讨论
+2. 把这个阶段到底做什么、不做什么、做到什么算完成先冻结下来
+3. 再从阶段级 Spec 往下拆成多个 Issue
+4. 前后端和文档仓库各自按分工推进
+
+也就是说，小功能里的很多分歧，最好在阶段讨论里就先收掉，而不是等进到具体仓库开发时再临时猜。
+
+---
+
+## 第 1 步：PM 发起阶段讨论
 
 **在哪做**：讨论
 
-```
-标题：[PM] 下一个 batch 是否做评论功能？
+```text
+标题：[PM] MVP 第一阶段到底先交付什么？
 
 内容：
-- MVP scope 里还没做的是：评论、分类标签、富文本
-- 按用户价值优先级，评论（核心互动）应排在分类标签前面
-- 技术风险：评论涉及关联查询和级联删除
+- 当前项目要进入第一个可验证阶段
+- 希望这一阶段完成后，至少能形成“最小可演示、最小可验证、最小可发布”的闭环
+- 目前候选项有：
+  1. 文章列表 / 文章详情
+  2. 登录态
+  3. 评论
+  4. 分类标签
+  5. 富文本编辑
 
 问题：
-1. 确认下一个 batch 是评论功能吗？
-2. 一阶评论（回复文章）还是两阶（回复评论）？
-3. 有没有技术约束我没想到的？
+1. MVP 第一阶段到底先做哪些，哪些明确不做？
+2. 这一阶段的完成标准是什么？
+3. 哪些能力必须一起冻结，不然下游会一直反复讨论？
 ```
 
 ---
 
-## 第 2 步：讨论收成决策
+## 第 2 步：讨论收成阶段决策
 
-**AI Agent 帮你做的**：
+**AI Agent 帮忙整理输出**：
 
-```
-回复：
-1. 评论在 MVP scope 内，优先级 ✓
-2. 建议：先做一阶，两阶放到 Phase 2
-3. 技术约束：
-   - Comment 需要 article_id 外键
-   - 删除文章要级联处理评论
-   - 需要确认"只能删自己的评论"的权限逻辑
+```text
+建议把 MVP 第一阶段先冻结成“最小内容闭环”，目标是：
 
-建议决策：
-- 做一阶评论，必须登录，不做敏感词过滤
+必须做：
+1. 文章列表页
+2. 文章详情页
+3. 登录能力
+4. 最小发布链路和验证闭环
+
+这一阶段明确不做：
+1. 评论
+2. 分类标签
+3. 富文本编辑
+4. 推荐系统
+
+为什么这样收：
+- 先让核心内容浏览和登录闭环跑通
+- 先把 FE / BE / Docs / Harness 的协作链条走顺
+- 把容易引起持续分歧的小功能先延后，避免第一阶段目标一直漂
+
+这一阶段 DoD：
+- FE / BE 都有对应 Issue 并完成
+- 核心接口和关键页面可验证
+- 有一轮完整的 PR 证据和回写闭环
+- 候选版本可冻结
 ```
 
 **PM 确认**：
 
-```
-"OK。一阶评论，必须登录，先不做敏感词。帮我起草 spec。"
+```text
+OK，MVP 第一阶段先冻结成“最小内容闭环”。
+评论、分类标签、富文本这一阶段都不做。
+帮我起草阶段级 Spec。
 ```
 
 ---
 
-## 第 3 步：AI 起草 Spec 并提交控制面 PR
+## 第 3 步：AI 起草阶段级 Spec 并提交控制面 PR
 
 **AI Agent 做的**：
 
 在控制面仓库创建 OpenSpec change：
 
-```
-openspec/changes/comment-system/
-├── proposal.md    ← "只做一阶评论，不做回复、不做敏感词"
-├── design.md      ← Comment 模型 + API 端点
-├── specs/comment-system/spec.md  ← 可验证场景
-└── tasks.md       ← 任务 + 依赖关系
-```
-
-同时更新契约：
-
-```
-contracts/ 新增对应端点定义
+```text
+openspec/changes/mvp-phase-1/
+├── proposal.md
+├── design.md
+├── specs/
+│   └── mvp-phase-1/spec.md
+└── tasks.md
 ```
 
-提交 PR 到控制面仓库（按 PR 模板填写决策上下文：为什么做、为什么是现在、明确不做）。
+其中大致表达的是：
+
+- `proposal.md`
+  说明为什么第一阶段先做“最小内容闭环”，哪些能力延后
+
+- `design.md`
+  说明这一阶段需要冻结哪些分层、契约、页面和依赖关系
+
+- `spec.md`
+  说明这一阶段的目标、非目标、验收场景、DoD
+
+- `tasks.md`
+  把阶段目标拆成多个任务，而不是一个大任务
+
+同时更新：
+
+```text
+contracts/ 对应阶段内涉及的 API / 数据契约
+```
+
+提交 PR 到控制面仓库，按 PR 模板填写：
+
+- 为什么做这一阶段
+- 为什么这些功能先做
+- 这一阶段明确不做什么
+- 这个阶段完成之后怎么判定闭环成立
 
 ---
 
 ## 第 4 步：PM 审核控制面 PR
 
-**PM 看决策上下文 + spec**：
+**PM 看的是阶段，不是看某一个零散小功能**：
 
-```
-proposal.md："只做一阶评论，不做回复、不做审核" → ✓
-spec.md：场景覆盖了创建/列表/删除/未认证/非本人删除 → ✓
-契约：端点定义清晰 → ✓
-tasks.md：BE 先行，FE 后行，有依赖关系 → ✓
+```text
+proposal.md：
+- 第一阶段目标是否收稳？ ✓
+- 不做项是否明确？ ✓
+
+design.md：
+- FE / BE / Docs / Harness 的依赖关系是否清楚？ ✓
+
+spec.md：
+- 验收场景是否围绕阶段目标，而不是围绕零碎功能？ ✓
+
+tasks.md：
+- 是否真的拆成了多个可执行任务？ ✓
+- 依赖关系是否写清楚？ ✓
 ```
 
-合并 PR。
+确认后合并。
 
 ---
 
-## 第 5 步：归档 + 更新运行层 + 下发 Issue
+## 第 5 步：归档 + 更新运行层 + 拆成多个 Issue 下发
 
 **AI Agent 做**（PM 触发后）：
 
-1. 归档 OpenSpec change：`openspec/changes/comment-system/` → `openspec/changes/archive/comment-system/`
+1. 归档 OpenSpec change
 
-2. 在代码仓库创建对应 Issue，Issue body 包含：
-   - 控制面真源表格（每个真源要读什么）
-   - 自包含的目标描述（不依赖外部链接就能理解要做什么）
-   - 验收标准
-   - 参考规范链接（补充阅读）
-
-3. 拿到 Issue URL 后，回写 `docs/runtime/issue-dispatch.md`：
-
-```
-| Priority | Repo | Issue | Why now | Status |
-|----------|------|-------|---------|--------|
-| P0 | BE | BE#101 | 评论是 MVP 核心互动，契约已冻结 | ready |
-| P0 | FE | FE#102 | 评论是 MVP 核心互动，依赖 BE #101 完成 | blocked(#101) |
+```text
+openspec/changes/mvp-phase-1/
+-> openspec/changes/archive/mvp-phase-1/
 ```
 
-4. 更新 `docs/runtime/phase-current.md`。
+2. 按 `tasks.md` 拆成多个 Issue，下发到对应仓库
+
+例如拆成：
+
+```text
+BE:
+- BE#101 文章列表接口
+- BE#102 文章详情接口
+- BE#103 登录接口与鉴权中间件
+
+FE:
+- FE#201 文章列表页
+- FE#202 文章详情页
+- FE#203 登录页与登录态接入
+
+Docs:
+- DOCS#301 阶段运行面板初始化与回写规则落地
+```
+
+3. 在 `docs/runtime/issue-dispatch.md` 记录阶段任务面板：
+
+```text
+| Priority | Repo | Issue（URL）    | Why now                    | Status  |
+|----------|------|----------|----------------------------|---------|
+| P0       | BE   | BE#101   | MVP Phase 1 核心接口       | ready   |
+| P0       | BE   | BE#102   | 依赖文章详情页联调         | ready   |
+| P0       | BE   | BE#103   | 登录能力是阶段闭环前置     | ready   |
+| P0       | FE   | FE#201   | 依赖 BE#101               | blocked |
+| P0       | FE   | FE#202   | 依赖 BE#102               | blocked |
+| P0       | FE   | FE#203   | 依赖 BE#103               | blocked |
+| P1       | Docs | DOCS#301 | 确保运行层同步闭环成立     | ready   |
+```
+
+4. 更新 `docs/runtime/phase-current.md`
+
+```text
+阶段名称：MVP Phase 1
+阶段目标：最小内容闭环
+本阶段非目标：评论 / 分类标签 / 富文本编辑
+```
 
 ---
 
-## 第 6 步：开发者执行
+## 第 6 步：开发者 / Agent 执行某一个 Issue
 
-**Agent 接到 Issue 后**：
+到这一步，真正执行的入口已经不是“做一个模糊的大阶段”，而是“做一个已经从阶段级 Spec 里拆出来的具体 Issue”。
 
+以 `BE#101` 为例：
+
+```text
+控制面真源：
+- Phase Spec: openspec/changes/archive/mvp-phase-1/specs/mvp-phase-1/spec.md
+- Tasks: openspec/changes/archive/mvp-phase-1/tasks.md
+- Contract: contracts/ 对应端点
+- 仓库内 AGENTS.md
+
+Issue 自包含写清楚：
+1. 做什么：实现文章列表接口
+2. 为什么现在做：这是 FE 列表页的前置依赖
+3. 非目标：不在本 Issue 中处理评论、分类标签、富文本
+4. 验收标准：接口字段、分页、错误语义、Smoke 要求
+5. Harness 计划：跑哪些命令，提供什么证据
 ```
-控制面真源（Issue 里写明了）：
-- Spec: openspec/changes/archive/comment-system/specs/comment-system/spec.md
-- 契约: contracts/ 对应端点
-- AGENTS.md: 代码仓库的 AGENTS.md
 
-要做什么（Issue 里自包含写明了）：
-1. 创建 Comment 模型（article_id 外键 + user_id）
-2. 实现 handler/service/dao
-3. 写测试
-4. 跑 smoke 验证
-
-不做什么（Issue 里写明了）：
-- 不做回复评论
-- 不做敏感词过滤
-```
+这里就能看出来，阶段讨论里已经把“小功能做不做、做到多深”这些分歧先收掉了，所以进入具体 Issue 后，不需要再临时边写边猜。
 
 ---
 
@@ -141,22 +237,21 @@ tasks.md：BE 先行，FE 后行，有依赖关系 → ✓
 
 ```markdown
 ## 决策上下文
-- 为什么做：评论是 MVP 核心互动，契约已冻结
-- 为什么是现在：BE 评论 API 是 FE 评论组件的前置依赖
-- 明确不做：不做回复评论、不做敏感词过滤
+- 为什么做：MVP Phase 1 的文章浏览闭环前置接口
+- 为什么是现在：FE#201 依赖本接口进入开发
+- 明确不做：评论、分类标签、富文本能力
 
 ## 变更摘要
-新增 Comment 模型 + handler/service/dao，实现创建/列表/删除 API 端点。
+实现文章列表接口，支持分页与基础错误返回。
 
 ## 关联真源
-- Issue: #101
-- Spec: 控制面仓库 openspec/changes/archive/...
+- Issue: BE#101
+- Phase Spec: 控制面仓库 openspec/changes/archive/mvp-phase-1/...
 - Contract: 控制面仓库 contracts/...
-- 验收标准在: Issue #101
 
 ## 冻结边界检查
 - [x] 只修改授权范围内文件
-- [x] 未引入范围外功能
+- [x] 未引入阶段范围外功能
 - [x] 未破坏既定契约
 
 ## Harness 验证
@@ -168,96 +263,105 @@ tasks.md：BE 先行，FE 后行，有依赖关系 → ✓
 - Result: PASS
 - Evidence: ...
 
-### Spec 场景覆盖
-- [x] 场景"创建评论" ✓
-- [x] 场景"获取评论列表" ✓
-- [x] 场景"删除自己的评论" ✓
-- [x] 场景"未认证拒绝" ✓
-- [x] 场景"非本人删除拒绝" ✓
+### Spec / Task 覆盖
+- [x] 覆盖 MVP Phase 1 中“文章列表接口”对应验收点
 
 ## 风险与回滚
-- 风险：新增表 migration
-- 回滚：删除 migration 文件，重启服务
+- 风险：分页参数默认值可能影响 FE 对接
+- 回滚：回退本次接口变更
 
 ## 回写
-- [ ] 发现契约描述不够清晰，建议后续修正
+- [ ] 若发现契约描述不清，回写控制面仓库
 ```
 
 ---
 
-## 第 8 步：PM 审核 PR
+## 第 8 步：PM / Reviewer 审核 PR
 
-**PM 逐条检查**：
+**这时候审核的是“这个 Issue 有没有忠实地执行阶段级冻结结果”**
 
-```
-1. 决策上下文清楚吗？            → ✓ 为什么做/为什么现在/不做
-2. 关联真源链接都有吗？          → ✓ Issue/Spec/Contract/验收标准
-3. Harness 证据完整吗？         → ✓ build + test + smoke
-4. Spec 场景全覆盖了吗？        → ✓ 5/5
-5. 没改不该改的文件吗？         → ✓
-6. 风险回滚清楚吗？             → ✓
-7. 回写提醒有吗？               → ✓
+```text
+1. 决策上下文清楚吗？             → ✓
+2. 关联真源齐了吗？               → ✓
+3. 有没有引入阶段外功能？         → ✓
+4. Harness 证据够不够？           → ✓
+5. 风险和回滚交代了吗？           → ✓
+6. 如果契约有偏差，是否提醒回写？ → ✓
 ```
 
 合并。
 
 ---
 
-## 第 9 步：PM 触发 AI 回写
+## 第 9 步：回写运行层
 
-**PM 说**："BE 评论 PR 合并了，帮我回写。"
+**PM 触发 AI 回写**：
+
+```text
+"BE#101 合并了，帮我同步阶段面板。"
+```
 
 **AI Agent 做**：
 
-1. 标记 Issue 为 done
-2. 更新 `docs/runtime/issue-dispatch.md`（BE → done，FE → ready）
-3. 发现 PR 里的回写提醒，提 PR 修正契约描述
-4. 更新 `docs/runtime/risk-register.md`（如需）
-5. 建议下一个阻塞已解除的 Issue 可以开始
+1. 更新 `docs/runtime/issue-dispatch.md`
 
----
-
-## 第 10 步：另一端执行（同理）
-
-流程相同：读 Issue → 按 AGENTS.md 读真源 → 实现 → 提 PR → PM 审核 → 合并 → 回写。
-
----
-
-## 第 11 步：功能完成后
-
-**AI Agent 汇总**：
-
+```text
+BE#101 -> done
+FE#201 -> ready
 ```
+
+2. 更新 `docs/runtime/risk-register.md`（如有）
+3. 如果 PR 中发现契约或规则问题，补控制面 PR
+4. 建议下一批已解除阻塞的 Issue 可以进入执行
+
+---
+
+## 第 10 步：整个阶段完成后
+
+当这个阶段拆出去的一组 Issue 都完成后，AI Agent 汇总：
+
+```text
 docs/runtime/phase-current.md 更新：
-  评论功能全链路完成 ✓
+  MVP Phase 1 完成 ✓
 
 docs/runtime/issue-dispatch.md 更新：
-  所有 Issue → done
+  本阶段任务全部 done ✓
 
 建议下一步：
-  "当前 batch 已完成。建议下一个 batch。是否开一个新的聚焦讨论？"
+  是否进入 MVP Phase 2？
+  候选项：评论 / 分类标签 / 富文本编辑
 ```
 
-PM 确认 → 回到第 1 步，开启下一轮。
+然后再开启下一轮阶段讨论。
 
 ---
 
-## 整个流程中每个文件的职责
+## 这个例子真正想强调什么
+
+这个例子真正想强调的，不是“某个小功能怎么走流程”，而是：
+
+1. 开始时先统筹一个阶段目标
+2. 先冻结这个阶段做什么、不做什么
+3. 小功能里的分歧尽量在阶段讨论里提前收掉
+4. 再从阶段级 Spec 往下拆成多个 Issue
+5. 前后端和文档仓库围绕同一份阶段真源协作
+
+这样整个控制面工作流才更像是在统筹项目推进，而不是在给某一个零散功能补流程。
+
+---
+
+## 整个流程里各文件分别在做什么
 
 | 文件 | 在流程中的角色 |
 |------|--------------|
-| `docs/control-plane/control-plane-handbook.md` | 红线：定义边界不能随便改 |
-| `docs/control-plane/mvp-scope.md` | 范围冻结：确认功能在范围内 |
-| `docs/control-plane/ai-native-governance.md` | 治理总则：先 spec 后代码 |
-| `docs/workflow/spec-issue-test-flow.md` | 流程：Spec→Issue→Test 五步 |
-| `docs/workflow/change-intake-and-escalation.md` | 分级：L0/L1/L2 怎么判定 |
-| `docs/workflow/pr-merge-gate-spec.md` | 门禁：PR 必须有什么才能合 |
-| `docs/harness/harness-closed-loop.md` | 验证：Harness 四要素标准 |
-| `docs/harness/harness-gate-baseline.md` | 基线：合并门禁 + 发版门禁 |
-| `docs/standards/agents-md-standard.md` | 标准：AGENTS.md 怎么写 |
-| `docs/runtime/phase-current.md` | **运行态**：当前在哪个阶段 |
-| `docs/runtime/issue-dispatch.md` | **运行态**：本阶段发了哪些 Issue |
-| `docs/runtime/risk-register.md` | **运行态**：当前风险台账 |
-| `contracts/` | 契约真源：FE/BE 共同消费 |
-| `openspec/changes/archive/<id>/` | 归档：确认后的 spec 产物 |
-| `templates/*` | 模板：Issue/PR/Spec/Checklist |
+| `docs/control-plane/` | 冻结长期有效的边界、范围、治理规则 |
+| `docs/workflow/spec-issue-test-flow.md` | 描述 Spec -> Issue -> Test 主流程 |
+| `docs/workflow/task-release-and-sync-sop.md` | 描述任务发布、Ready 门槛、同步节奏 |
+| `docs/workflow/pr-merge-gate-spec.md` | 规定 PR 合并门禁 |
+| `docs/harness/` | 定义验证闭环和证据要求 |
+| `docs/runtime/phase-current.md` | 记录当前阶段目标、非目标、DoD |
+| `docs/runtime/issue-dispatch.md` | 记录阶段任务面板和状态变化 |
+| `docs/runtime/risk-register.md` | 记录阶段风险 |
+| `templates/` | 提供 Spec / Issue / PR / Harness 模板 |
+| `contracts/` | 维护跨端契约真源 |
+| `openspec/` | 承接重大变更的冻结、审核、归档 |
